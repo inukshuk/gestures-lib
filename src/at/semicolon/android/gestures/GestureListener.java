@@ -20,11 +20,11 @@ import android.view.View.OnTouchListener;
 public abstract class GestureListener implements OnTouchListener {
 
 	private enum GestureType {
-		UNDEFINED, LONGPRESS, SCROLL, DOUBLE_TAP_PENDING
+		UNDEFINED, LONGPRESS, SCROLL, DOUBLE_TAP_PENDING, DOUBLE_TAP
 	}
 
 	private GestureType mGestureType = GestureType.UNDEFINED;
-	
+
 	private float mX;
 	private float mY;
 	private float mDownX;
@@ -49,8 +49,7 @@ public abstract class GestureListener implements OnTouchListener {
 
 	private final Runnable mTapRunnable = new Runnable() {
 		public void run() {
-			mGestureType = GestureType.DOUBLE_TAP_PENDING;
-			mConsumed = false;
+			mGestureType = GestureType.UNDEFINED;
 			onSingleTap(mDownEvent);
 		}
 	};
@@ -77,7 +76,7 @@ public abstract class GestureListener implements OnTouchListener {
 
 	abstract protected void onDoubleTap(MotionEvent e);
 
-	
+
 	// Inherited from OnTouchListener
 
 	public boolean onTouch(View v, MotionEvent e) {
@@ -92,20 +91,33 @@ public abstract class GestureListener implements OnTouchListener {
 
 		switch (action) {
 			case MotionEvent.ACTION_DOWN:
-				
-				if (onDown(e) == true) {
-					mConsumed = false;
+
+				mConsumed = onDown(e);
+
+				// return if onDown consumes the event
+				if (mConsumed) {
+					mVelocityTracker.recycle();
+					mVelocityTracker = null;
+					mGestureType = GestureType.UNDEFINED;
 					return true;
 				}
-				
-				v.postDelayed(mLongPressRunnable, mLongPressTimeout);
-				
-				mDownEvent = e;
-				mX = mDownX = x;
-				mY = mDownY = y;
-				
+
+				// check if this is a double tap
+				if (mGestureType == GestureType.DOUBLE_TAP_PENDING) {
+					v.removeCallbacks(mTapRunnable);
+					mGestureType = GestureType.DOUBLE_TAP;
+					mConsumed = false;
+				}
+				else {
+					v.postDelayed(mLongPressRunnable, mLongPressTimeout);
+
+					mDownEvent = e;
+
+					mX = mDownX = x;
+					mY = mDownY = y;
+				}
 				break;
-				
+
 			case MotionEvent.ACTION_MOVE:
 				final float dx = (x - mX) / v.getWidth();
 				final float dy = (y - mY) / v.getHeight();
@@ -113,7 +125,7 @@ public abstract class GestureListener implements OnTouchListener {
 				switch (mGestureType) {
 					case SCROLL:
 					case LONGPRESS:
-						if (mConsumed = false) {
+						if (mConsumed == false) {
 							mConsumed = onScroll(mDownEvent, e, dx, dy);							
 						}
 						break;
@@ -132,37 +144,52 @@ public abstract class GestureListener implements OnTouchListener {
 
 				mX = x;
 				mY = y;
-				
+
 				break;
-				
+
 			case MotionEvent.ACTION_UP:
-				
-				if (mGestureType == GestureType.SCROLL) {
-					mVelocityTracker.computeCurrentVelocity(1000, mScaledMaximumFlingVelocity);
-					mConsumed = onFling(mDownEvent, e, mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
+
+				switch (mGestureType) {
+					case SCROLL:
+						if (mConsumed == false) {
+							mVelocityTracker.computeCurrentVelocity(1000, mScaledMaximumFlingVelocity);
+							mConsumed = onFling(mDownEvent, e, mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
+						}
+						mGestureType = GestureType.UNDEFINED;
+						break;
+
+					case DOUBLE_TAP:
+						onDoubleTap(mDownEvent);
+						// fall through	
+					case LONGPRESS:
+						mGestureType = GestureType.UNDEFINED;
+						mConsumed = false;
+						break;
+						
+					default:
+						v.postDelayed(mTapRunnable, mDoubleTapTimeout);
+						mGestureType = GestureType.DOUBLE_TAP_PENDING;
+						break;
 				}
-				else {
-					v.postDelayed(mTapRunnable, mTapTimeout);
-					mConsumed = onFling(mDownEvent, e, 0, 0);
-				}
-				
+
 				mVelocityTracker.recycle();
 				mVelocityTracker = null;
 				
 				v.removeCallbacks(mLongPressRunnable);
-				mGestureType = GestureType.UNDEFINED;
-				
+
 				break;
 
 			default:
-				
+
+				// clean up
 				mVelocityTracker.recycle();
 				mVelocityTracker = null;
 				
 				v.removeCallbacks(mLongPressRunnable);
-				
+				v.removeCallbacks(mTapRunnable);
+
 				mGestureType = GestureType.UNDEFINED;
-				
+
 				break;
 		}
 
