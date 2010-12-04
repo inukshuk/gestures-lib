@@ -66,6 +66,8 @@ public abstract class GestureListener implements OnTouchListener {
 
 	abstract protected boolean onDown(MotionEvent e);
 
+	abstract protected void onUp(MotionEvent e);
+
 	abstract protected boolean onLongPress(MotionEvent e);
 
 	abstract protected boolean onScroll(MotionEvent e1, MotionEvent e2, float dx, float dy);
@@ -148,6 +150,8 @@ public abstract class GestureListener implements OnTouchListener {
 				break;
 
 			case MotionEvent.ACTION_UP:
+
+				onUp(e);
 
 				switch (mGestureType) {
 					case SCROLL:
