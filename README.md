@@ -17,67 +17,67 @@ Usage
 
 To use this library, simply clone the git repository:
 
-  git clone git://github.com/inukshuk/gestures-lib.git
+    git clone git://github.com/inukshuk/gestures-lib.git
 
 and include a reference to it in the `default.properties` of your Android
 project:
 
-  android.library.reference=<path/to>/gestures-lib
+    android.library.reference=<path/to>/gestures-lib
 
 You can then use the GestureListener in one of your Views. For instance:
 
-  import at.semicolon.android.gestures.GestureListener
+    import at.semicolon.android.gestures.GestureListener
   
-  [...]
-  
-  public class MyView extends View {
- 
-    private MyGestureListener mGestureListener;
-     
     [...]
     
-    setOnTouchListener(mGestureListener);
+    public class MyView extends View {
     
-    private class MyGestureListener extends GestureListener {
+      private MyGestureListener mGestureListener;
+     
+      [...]
     
-      public MyGestureListener(Context context) {
-        super(context);
-      }
+      setOnTouchListener(mGestureListener);
+    
+      private class MyGestureListener extends GestureListener {
+    
+        public MyGestureListener(Context context) {
+          super(context);
+        }
       
-      @Override
-      protected boolean onDown(MotionEvent e) {
+        @Override
+        protected boolean onDown(MotionEvent e) {
 
-      }
+        }
 
-      @Override
-      protected void onUp(MotionEvent e){
+        @Override
+        protected void onUp(MotionEvent e){
 
-      }
+        }
 
-      @Override
-      protected boolean onLongPress(float x, float y) {
+        @Override
+        protected boolean onLongPress(float x, float y) {
       
-      }
+        }
 
-      @Override
-      protected boolean onScroll(float x, float y, MotionEvent e, float dx, float dy) {
-      
-      }
+        @Override
+        protected boolean onScroll(float x, float y, MotionEvent e, float dx, float dy) {
+        
+        }
 
-      @Override
-      protected boolean onFling(float x, float y, MotionEvent e, float vx, float vy) {
+        @Override
+        protected boolean onFling(float x, float y, MotionEvent e, float vx, float vy) {
       
-      }
+        }
 
-      @Override
-      protected void onSingleTap(float x, float y) {
+        @Override
+        protected void onSingleTap(float x, float y) {
       
-      }
+        }
 
-      @Override
-      protected void onDoubleTap(float x, float y) {
+        @Override
+        protected void onDoubleTap(float x, float y) {
       
-      }
+        }
       
-    }    
-  }
+      }    
+    }
