@@ -2,7 +2,7 @@ gestures-lib
 ============
 
 An Android library that is basically a replacement for Android's current
-(GestureDetector)[http://developer.android.com/reference/android/view/GestureDetector.html].
+[GestureDetector](http://developer.android.com/reference/android/view/GestureDetector.html).
 
 The current version is flawed in that it does not fire any `scroll` events
 once a `longpress` events has been triggered thus making it impossible to
