@@ -29,7 +29,6 @@ public abstract class GestureListener implements OnTouchListener {
 	private float mY;
 	private float mDownX;
 	private float mDownY;
-	private MotionEvent mDownEvent;
 	private boolean mConsumed;
 
 	private final int mScaledTouchSlop;
@@ -43,14 +42,14 @@ public abstract class GestureListener implements OnTouchListener {
 	private final Runnable mLongPressRunnable = new Runnable() {
 		public void run() {
 			mGestureType = GestureType.LONGPRESS;
-			mConsumed = onLongPress(mDownEvent);
+			mConsumed = onLongPress(mDownX, mDownY);
 		}
 	};
 
 	private final Runnable mTapRunnable = new Runnable() {
 		public void run() {
 			mGestureType = GestureType.UNDEFINED;
-			onSingleTap(mDownEvent);
+			onSingleTap(mDownX, mDownY);
 		}
 	};
 
@@ -68,15 +67,15 @@ public abstract class GestureListener implements OnTouchListener {
 
 	abstract protected void onUp(MotionEvent e);
 
-	abstract protected boolean onLongPress(MotionEvent e);
+	abstract protected boolean onLongPress(float x, float y);
 
-	abstract protected boolean onScroll(MotionEvent e1, MotionEvent e2, float dx, float dy);
+	abstract protected boolean onScroll(float x, float y, MotionEvent e, float dx, float dy);
 
-	abstract protected boolean onFling(MotionEvent e1, MotionEvent e2, float vx, float vy);
+	abstract protected boolean onFling(float x, float y, MotionEvent e, float vx, float vy);
 
-	abstract protected void onSingleTap(MotionEvent e);
+	abstract protected void onSingleTap(float x, float y);
 
-	abstract protected void onDoubleTap(MotionEvent e);
+	abstract protected void onDoubleTap(float x, float y);
 
 
 	// Inherited from OnTouchListener
@@ -113,8 +112,6 @@ public abstract class GestureListener implements OnTouchListener {
 				else {
 					v.postDelayed(mLongPressRunnable, mLongPressTimeout);
 
-					mDownEvent = e;
-
 					mX = mDownX = x;
 					mY = mDownY = y;
 				}
@@ -128,7 +125,7 @@ public abstract class GestureListener implements OnTouchListener {
 					case SCROLL:
 					case LONGPRESS:
 						if (mConsumed == false) {
-							mConsumed = onScroll(mDownEvent, e, dx, dy);							
+							mConsumed = onScroll(mDownX, mDownY, e, dx, dy);							
 						}
 						break;
 					case UNDEFINED:
@@ -157,13 +154,13 @@ public abstract class GestureListener implements OnTouchListener {
 					case SCROLL:
 						if (mConsumed == false) {
 							mVelocityTracker.computeCurrentVelocity(1000, mScaledMaximumFlingVelocity);
-							mConsumed = onFling(mDownEvent, e, mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
+							mConsumed = onFling(mDownX, mDownY, e, mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
 						}
 						mGestureType = GestureType.UNDEFINED;
 						break;
 
 					case DOUBLE_TAP:
-						onDoubleTap(mDownEvent);
+						onDoubleTap(mDownX, mDownY);
 						// fall through	
 					case LONGPRESS:
 						mGestureType = GestureType.UNDEFINED;
